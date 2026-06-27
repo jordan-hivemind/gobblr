@@ -210,6 +210,7 @@ function openProfile(id) {
   if (!t) return;
   state.sheetProfile = t;
   state.sheetIdx = 0;
+  swallowSheetClick = false;
   drawProfileSheet();
   $("#profileSheet").hidden = false;
 }
@@ -286,6 +287,60 @@ function drawProfileSheet() {
 function closeSheets() {
   $("#profileSheet").hidden = true;
   $("#filterSheet").hidden = true;
+}
+
+/* ---- gestures on the open profile: drag down to close, swipe to navigate ---- */
+function profileNavList() {
+  // navigate the list the user is browsing; fall back to all turkeys
+  const cur = state.sheetProfile;
+  if (!cur) return TURKEYS;
+  const vis = visibleTurkeys();
+  return vis.some((t) => t.id === cur.id) ? vis : TURKEYS;
+}
+function gotoProfile(delta) {
+  if (!state.sheetProfile) return;
+  const list = profileNavList();
+  const i = list.findIndex((t) => t.id === state.sheetProfile.id);
+  if (i === -1) return;
+  state.sheetProfile = list[(i + delta + list.length) % list.length];
+  state.sheetIdx = 0;
+  drawProfileSheet();
+}
+let swallowSheetClick = false;
+function installSheetGestures() {
+  const panel = $("#profilePanel");
+  let sx = 0, sy = 0, dx = 0, dy = 0, dragging = false, moved = false, fromTop = false;
+
+  panel.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    sx = e.clientX; sy = e.clientY; dx = 0; dy = 0;
+    dragging = true; moved = false; swallowSheetClick = false;
+    fromTop = panel.scrollTop <= 0; // only drag-to-close when scrolled to the top
+    if (e.pointerType === "mouse") panel.setPointerCapture(e.pointerId);
+  });
+  panel.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+    panel.style.transition = "none";
+    if (fromTop && dy > 0 && Math.abs(dy) >= Math.abs(dx)) panel.style.transform = `translateY(${dy}px)`;
+    else if (Math.abs(dx) > Math.abs(dy)) panel.style.transform = `translateX(${dx}px)`;
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    panel.style.transition = "transform .2s ease";
+    panel.style.transform = "";
+    if (moved) swallowSheetClick = true; // a swipe shouldn't also trigger a photo tap
+    if (fromTop && dy > 90 && ay > ax) closeSheets();
+    else if (ax > 60 && ax > ay) gotoProfile(dx < 0 ? 1 : -1); // swipe left → next, right → previous
+  };
+  panel.addEventListener("pointerup", end);
+  panel.addEventListener("pointercancel", end);
+  panel.addEventListener("click", (e) => {
+    if (swallowSheetClick) { e.stopImmediatePropagation(); e.preventDefault(); swallowSheetClick = false; }
+  }, true);
 }
 
 /* ================= Chat view ================= */
@@ -553,4 +608,5 @@ const iconShield = `<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-
 
 /* ================= Boot ================= */
 buildTribeChips();
+installSheetGestures();
 goTab("browse");
