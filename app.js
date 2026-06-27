@@ -301,6 +301,17 @@ function openChat(withId) {
     <span class="bub__t bub__t--${m.from}">${m.t}</span>`).join("");
   screen.innerHTML = `
     <div class="chat">
+      <button class="chathead" data-open="${withId}" aria-label="View ${t.name.split(" ")[0]}'s profile">
+        <div class="av av--sm">
+          ${imgEl(photoUrl(t), "")}
+          ${t.online ? '<span class="av__on"></span>' : ""}
+        </div>
+        <div class="chathead__main">
+          <div class="chathead__name">${t.name.split(" ")[0]}, ${t.age}</div>
+          <div class="chathead__sub">${statusText(t)}</div>
+        </div>
+        <svg class="chathead__chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
       <div class="bubbles" id="bubbles">${renderBubbles()}</div>
     </div>
     <div class="chatbar">
