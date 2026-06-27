@@ -1,9 +1,9 @@
 /* Gobblr seed data — turkey profiles.
- * Photos are free-to-use stock from Pexels (Pexels License). If a photo fails
- * to load, app.js swaps in a generated SVG fallback so the grid never breaks. */
+ * Photos are free-to-use stock from Pexels (Pexels License), self-hosted under
+ * images/<id>.jpeg. If a photo fails to load, app.js swaps in a generated
+ * turkey-glyph fallback so the grid never breaks. */
 
-const px = (id) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=700`;
+const px = (id) => `images/${id}.jpeg`;
 
 const TRIBES = [
   "Tom", "Hen", "Jake", "Jenny", "Heritage", "Wild",

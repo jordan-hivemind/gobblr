@@ -30,7 +30,7 @@ window.fallbackTile = (cls) => {
 };
 function photoUrl(t, i = 0) {
   const id = t.photos[i % t.photos.length];
-  return `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=700`;
+  return `images/${id}.jpeg`;
 }
 function distLabel(d) {
   if (d === 0) return "right here";
