@@ -316,7 +316,6 @@ function installSheetGestures() {
     sx = e.clientX; sy = e.clientY; dx = 0; dy = 0;
     dragging = true; moved = false; swallowSheetClick = false;
     fromTop = panel.scrollTop <= 0; // only drag-to-close when scrolled to the top
-    if (e.pointerType === "mouse") panel.setPointerCapture(e.pointerId);
   });
   panel.addEventListener("pointermove", (e) => {
     if (!dragging) return;
@@ -607,6 +606,9 @@ const iconBell = `<svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 
 const iconShield = `<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>`;
 
 /* ================= Boot ================= */
+// disable pinch-zoom (iOS Safari ignores user-scalable=no); single-touch scroll/swipe unaffected
+["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+  document.addEventListener(ev, (e) => e.preventDefault()));
 buildTribeChips();
 installSheetGestures();
 goTab("browse");
