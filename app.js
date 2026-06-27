@@ -311,7 +311,7 @@ function openChat(withId) {
     </div>`;
   const scrollEnd = () => { const b = $("#bubbles"); b.scrollTop = b.scrollHeight; screen.scrollTop = screen.scrollHeight; };
   scrollEnd();
-  const send = () => {
+  const send = async () => {
     const inp = $("#chatInput");
     const text = inp.value.trim();
     if (!text) return;
@@ -319,11 +319,16 @@ function openChat(withId) {
     inp.value = "";
     $("#bubbles").innerHTML = renderBubbles();
     scrollEnd();
-    setTimeout(() => {
-      chat.messages.push({ from: "them", text: pickReply(), t: nowTime() });
-      $("#bubbles").innerHTML = renderBubbles();
-      scrollEnd();
-    }, 1100);
+    const typing = document.createElement("div");
+    typing.className = "bub bub--them bub--typing";
+    typing.innerHTML = "<span></span><span></span><span></span>";
+    $("#bubbles").appendChild(typing);
+    scrollEnd();
+    const reply = await fetchBotReply(withId, chat);
+    typing.remove();
+    chat.messages.push({ from: "them", text: reply, t: nowTime() });
+    $("#bubbles").innerHTML = renderBubbles();
+    scrollEnd();
   };
   $("#chatSend").onclick = send;
   $("#chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
@@ -334,7 +339,64 @@ const REPLIES = [
   "ha you're trouble", "free range fr", "🦃💛", "love that for us",
   "ok but what's your roost situation", "say less",
 ];
-function pickReply() { return REPLIES[Math.floor(Math.random() * REPLIES.length)]; }
+const TURKEYJERKY_REPLIES = [
+  "two birds, one branch? 😏", "I'm self-basting but I do take a helping wing",
+  "buff my wattle and I'll buff yours, fair's fair", "I do my best work solo… but I'm a team player 🦃",
+  "free-range AND hands-on, that's the dream", "you, me, and a bottle of corn oil",
+  "I call it cardio. flock me on that.", "strut for me and I'll strut right back 😉",
+  "tandem preening is criminally underrated", "warning: I get carried away in pairs",
+];
+function pickReply(withId) {
+  const pool = withId === "turkeyjerky" ? TURKEYJERKY_REPLIES : REPLIES;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/* ---- live AI replies via the /api/chat serverless proxy ----
+ * Falls back to the canned replies above when the proxy isn't reachable
+ * (local file open, GitHub Pages, or ANTHROPIC_API_KEY not set yet). */
+function personaFor(t) {
+  if (t.id === "turkeyjerky") {
+    return "You are TurkeyJerky, a shameless, flirty turkey on a turkey dating app called Gobblr. " +
+      "You constantly make cheeky innuendo and double-entendre jokes, leaning on turkey-themed wordplay " +
+      "(self-basting, buffing your own wattle, doing your best work solo but better in pairs, 'two birds one branch', BYO corn oil, etc). " +
+      "Keep it PG-13 — suggestive and silly, never explicit or graphic. " +
+      "Reply like a text message: 1-2 short punchy lines with the odd emoji. Always stay in character as a turkey.";
+  }
+  return `You are ${t.name}, a turkey on a turkey dating app called Gobblr. ` +
+    `Bio: "${t.bio}" Tribe: ${t.tribe}. Headline: "${t.headline}". ` +
+    "Reply in character as this turkey — flirty, fun, with turkey puns. " +
+    "Text-message style: 1-2 short lines with the odd emoji. Keep it light and playful.";
+}
+function toAnthropicMessages(msgs) {
+  // Map {from:'me'|'them'} → Anthropic roles, merge consecutive same-role turns,
+  // and ensure the sequence starts with a user turn.
+  const out = [];
+  for (const m of msgs) {
+    const role = m.from === "me" ? "user" : "assistant";
+    if (out.length && out[out.length - 1].role === role) out[out.length - 1].content += "\n" + m.text;
+    else out.push({ role, content: m.text });
+  }
+  while (out.length && out[0].role !== "user") out.shift();
+  return out;
+}
+async function fetchBotReply(withId, chat) {
+  const t = byId(withId);
+  const messages = toAnthropicMessages(chat.messages);
+  if (!messages.length) return pickReply(withId);
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ system: personaFor(t), messages }),
+    });
+    if (!res.ok) throw new Error("status " + res.status);
+    const data = await res.json();
+    const text = (data.text || "").trim();
+    return text || pickReply(withId);
+  } catch (_) {
+    return pickReply(withId);
+  }
+}
 function nowTime() {
   const d = new Date();
   let h = d.getHours(), m = d.getMinutes();

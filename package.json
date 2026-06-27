@@ -1,0 +1,9 @@
+{
+  "name": "gobblr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gobblr — turkey dating app (static site + Anthropic chat proxy)",
+  "engines": {
+    "node": ">=18"
+  }
+}

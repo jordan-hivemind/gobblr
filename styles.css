@@ -150,14 +150,14 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .phero__close, .phero__nav {
   position: absolute; top: 14px; width: 38px; height: 38px; border-radius: 50%;
   background: rgba(0,0,0,.45); backdrop-filter: blur(6px); border: 0; color: #fff;
-  display: grid; place-items: center; cursor: pointer;
+  display: grid; place-items: center; cursor: pointer; z-index: 3;
 }
 .phero__close { right: 14px; }
 .phero__grad { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(12,12,14,.95) 100%); pointer-events: none; }
-.phero__dots { position: absolute; top: 12px; left: 0; right: 0; display: flex; gap: 4px; justify-content: center; padding: 0 60px; }
+.phero__dots { position: absolute; top: 12px; left: 0; right: 0; display: flex; gap: 4px; justify-content: center; padding: 0 60px; z-index: 2; pointer-events: none; }
 .phero__dot { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.35); }
 .phero__dot.is-on { background: #fff; }
-.phero__tap { position: absolute; top: 0; bottom: 0; width: 40%; cursor: pointer; }
+.phero__tap { position: absolute; top: 0; bottom: 0; width: 40%; cursor: pointer; z-index: 1; }
 .phero__tap--l { left: 0; } .phero__tap--r { right: 0; }
 .phero__name { position: absolute; left: 18px; right: 18px; bottom: 14px; }
 .phero__name h2 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
@@ -329,3 +329,10 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .filter__block { padding: 12px 0; border-top: 1px solid var(--line); }
 .filter__label { font-size: 13px; color: var(--txt-dim); margin-bottom: 10px; display: flex; justify-content: space-between; }
 .filter__label em { color: var(--gold-hi); font-style: normal; font-weight: 700; }
+
+/* chat typing indicator */
+.bub--typing { display: inline-flex; gap: 4px; align-items: center; }
+.bub--typing span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .4; animation: bubblink 1s infinite; }
+.bub--typing span:nth-child(2) { animation-delay: .15s; }
+.bub--typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes bubblink { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-2px); } }

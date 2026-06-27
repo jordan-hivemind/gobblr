@@ -32,6 +32,7 @@ const PHOTOS = {
   giblet:     [12001576, 32154952],
   plucky:     [31853586, 9890545],
   tom:        [18530838, 24507154],
+  turkeyjerky: [4734931, 15895025],
 };
 
 const TURKEYS = [
@@ -151,6 +152,15 @@ const TURKEYS = [
     looking: ["Strut partners", "Long gobbles & friendship"],
     stats: { Strut: "Fearless", Plumage: "Wild bronze", Roost: "Deep woods", Gobble: "Bold" },
     photos: PHOTOS.plucky,
+  },
+  {
+    id: "turkeyjerky", name: "TurkeyJerky", age: 4, online: true, dist: 0.1,
+    tribe: "Free-Range", height: "3'6\"", weight: "17 lbs", wattle: "Suspiciously well-buffed",
+    headline: "Solo strutter looking for a co-preener. Two birds, one branch?",
+    bio: "Self-made and self-basting — but honestly I'd rather we baste each other. I do my best work alone, though I'm told I'm even better in pairs. Looking for a flock-mate to buff wattles in tandem and call it cardio. No judgment, no foxes, just two free-rangers helping each other reach Prime Plumage. BYO corn oil.",
+    looking: ["Free-range fun", "Strut partners", "Right now"],
+    stats: { Strut: "Self-taught", Plumage: "Hand-polished", Roost: "Roomy, room for two", Gobble: "Heavy breathing" },
+    photos: PHOTOS.turkeyjerky,
   },
   {
     id: "tom", name: "Tom Featherton III", age: 7, online: false, last: "2 days ago", dist: 8.1,
